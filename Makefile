@@ -586,7 +586,7 @@ endif
 endif
 
 # Prohibit date/time macros, which would make the build non-deterministic
-KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
+# KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
 
 ifneq ($(CONFIG_SYS_TEXT_BASE),)
 KBUILD_CPPFLAGS += -DCONFIG_SYS_TEXT_BASE=$(CONFIG_SYS_TEXT_BASE)
