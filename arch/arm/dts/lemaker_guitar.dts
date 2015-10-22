@@ -334,7 +334,7 @@
 		channel_invert = <0>;
 		bit_invert = <0>;
 		bootable = <1>; 
-		bootrotate = <3>;   
+		bootrotate = <0>;   
 		default_resolution = "1080P60HZ";
 	};
 
