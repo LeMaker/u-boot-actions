@@ -394,7 +394,7 @@ static int fdtdec_enable_lcd(void)
 	}
 
 	if(lcd_par.lcdstandby_gpio.name){
-		lcd_activate_gpio(&lcd_par.lcdstandby_gpio);
+		lcd_deactivate_gpio(&lcd_par.lcdstandby_gpio);
 		printf("standby ok %s\n", lcd_par.lcdstandby_gpio.name);
 	}
 	
@@ -405,6 +405,12 @@ static int fdtdec_enable_lcd(void)
 	}
 	
 	open_backlight();
+
+	if(lcd_par.lcdstandby_gpio.name){
+                lcd_activate_gpio(&lcd_par.lcdstandby_gpio);
+                printf("standby ok %s\n", lcd_par.lcdstandby_gpio.name);
+        }
+
 
 	debug("fdtdec enable lcd ok %d\n", bl_power);
 
@@ -420,6 +426,21 @@ static int fdtdec_disable_lcd(void)
 
 	pd = &lcd_par.pwm_bl_data;
 	pd->power = 0;
+
+	if(lcd_par.lcdstandby_gpio.name){
+                lcd_deactivate_gpio(&lcd_par.lcdstandby_gpio);
+                printf("standby ok %s\n", lcd_par.lcdstandby_gpio.name);
+        }
+
+
+	if(lcd_par.lcdreset_gpio.name){
+                lcd_deactivate_gpio(&lcd_par.lcdreset_gpio);
+                //mdelay(10);
+                //lcd_activate_gpio(&lcd_par.lcdreset_gpio);
+                printf("reset ok %s\n", lcd_par.lcdreset_gpio.name);
+        }
+
+
 	owl_pwm_backlight_update_status(pd);
 
 	lcd_deactivate_gpio(&lcd_par.lcdpower_gpio);
