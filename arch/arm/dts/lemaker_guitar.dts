@@ -203,6 +203,7 @@
                             left_adc_val =  <0 90 175 270>;     /* for key code translator, each value defines a lower bound of ADC value of a key */
                             right_adc_val = <30 120 220 320>;   /* for key code translator, each value defines a upper bound of ADC value of a key */
                             key_val = <KEY_HOME KEY_MENU KEY_VOLUMEUP KEY_VOLUMEDOWN>; /* for key code translator, each value defines the key_code of a key */
+			    status = "disabled";                /* enable/disable ADC key function (okay or disabled) */
                         };
 
 			atc260x-power{
