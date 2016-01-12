@@ -19,11 +19,26 @@ struct pwm_info {
 #define PWM_PARENT_LOSC	1
 #define DIV_ROUND(n,d)		(((n) + ((d)/2)) / (d))
 
-unsigned int pwm_ctl_reg_array[] = {
-	PWM_CTL0, PWM_CTL1, PWM_CTL2, PWM_CTL3, PWM_CTL4, PWM_CTL5
+struct pwm_hw_info {
+	struct {
+		u32 reg;
+	} ctrl;
+	struct {
+		u32 reg;
+	} clk;
+	struct {
+		u32	reg;
+		u32	shift;
+	} gate;
 };
-unsigned int pwm_clk_reg_array[] = {
-	CMU_PWM0CLK, CMU_PWM1CLK, CMU_PWM2CLK, CMU_PWM3CLK, CMU_PWM4CLK, CMU_PWM5CLK
+
+struct pwm_hw_info pwm_hw_array[] = {
+	{.ctrl.reg = PWM_CTL0, .clk.reg = CMU_PWM0CLK, .gate = {.reg = CMU_DEVCLKEN1, .shift = 23} },
+	{.ctrl.reg = PWM_CTL1, .clk.reg = CMU_PWM1CLK, .gate = {.reg = CMU_DEVCLKEN1, .shift = 24} },
+	{.ctrl.reg = PWM_CTL2, .clk.reg = CMU_PWM2CLK, .gate = {.reg = CMU_DEVCLKEN1, .shift = 25} },
+	{.ctrl.reg = PWM_CTL3, .clk.reg = CMU_PWM3CLK, .gate = {.reg = CMU_DEVCLKEN1, .shift = 26} },
+	{.ctrl.reg = PWM_CTL4, .clk.reg = CMU_PWM4CLK, .gate = {.reg = CMU_DEVCLKEN0, .shift = 11} },
+	{.ctrl.reg = PWM_CTL5, .clk.reg = CMU_PWM5CLK, .gate = {.reg = CMU_DEVCLKEN0, .shift = 0} },
 };
 
 static int pwm_clk_set(int hwpwm, u32 parent, int rate)
@@ -33,7 +48,7 @@ static int pwm_clk_set(int hwpwm, u32 parent, int rate)
 	u32 tmp;
 	u32 cmu_pwmclk_reg;
 
-	cmu_pwmclk_reg = pwm_clk_reg_array[hwpwm];
+	cmu_pwmclk_reg = pwm_hw_array[hwpwm].clk.reg;
 
 	tmp = readl(cmu_pwmclk_reg);
 
@@ -57,13 +72,23 @@ static int pwm_clk_set(int hwpwm, u32 parent, int rate)
 
 int pwm_enable(int pwm_id)
 {
-	setbits_le32(CMU_DEVCLKEN1, 0x1 << (23 + pwm_id));
+	u32	pwm_gate_reg, pwm_gate_shift;
+
+	pwm_gate_reg = pwm_hw_array[pwm_id].gate.reg;
+	pwm_gate_shift = pwm_hw_array[pwm_id].gate.shift;
+	
+	setbits_le32(pwm_gate_reg, 0x1 << pwm_gate_shift);
 	return 0;
 }
 
 void pwm_disable(int pwm_id)
 {
-	clrbits_le32(CMU_DEVCLKEN1, 0x1 << (23 + pwm_id));
+	u32	pwm_gate_reg, pwm_gate_shift;
+
+	pwm_gate_reg = pwm_hw_array[pwm_id].gate.reg;
+	pwm_gate_shift = pwm_hw_array[pwm_id].gate.shift;
+
+	clrbits_le32(pwm_gate_reg, 0x1 << pwm_gate_shift);
 }
 
 int pwm_config(int hwpwm, int duty_ns,
@@ -100,7 +125,7 @@ int pwm_config(int hwpwm, int duty_ns,
 	val = ((((duty_ns) << 6) << 1) / (period_ns) + 1) >> 1;
 	val = (val) ? (val-1) : 0;
 
-	pwm_ctl_reg = pwm_ctl_reg_array[hwpwm];
+	pwm_ctl_reg = pwm_hw_array[hwpwm].ctrl.reg;
 #if defined(CONFIG_ATM7059A)
 	tmp = ((val<<10) + 63);
 	
