@@ -699,7 +699,7 @@ int owl_dsi_init(void)
 		return -1;
 	}
 	data_width = get_dsi_data_width(&dsi_par);
-	owl_display_register(DSI_DISPLAYER, &dsi_ops, dsi_par.mode, data_width, 0);
+	owl_display_register(DSI_DISPLAYER,"dsi",&dsi_ops, dsi_par.mode, data_width, 0);
 
 	return 0;
 }

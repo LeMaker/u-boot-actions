@@ -350,7 +350,7 @@ static int gpio_bit_to_pwr(struct owl_fdt_gpio_state *gpio)
 {
 	int tmp = 0;
 	if(gpio->name){
-		if((gpio->gpio>MIN_GPIO_TO_PWR)&&(gpio->gpio<MAX_GPIO_TO_PWR)){
+		if((gpio->gpio>=MIN_GPIO_TO_PWR)&&(gpio->gpio<=MAX_GPIO_TO_PWR)){
 			tmp |= (1<<(MAX_GPIO_TO_PWR-gpio->gpio));
 			tmp <<= 4;
 		}	
@@ -608,7 +608,7 @@ int owl_lcd_init(void)
 		return -1;
 	}
 	data_width = get_lcd_data_width(&lcd_par);
-	owl_display_register(LCD_DISPLAYER, &lcd_ops, lcd_par.mode, data_width, 0);
+	owl_display_register(LCD_DISPLAYER,"lcd", &lcd_ops, lcd_par.mode, data_width, 0);
 	return 0;
 }
 
