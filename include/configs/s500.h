@@ -312,6 +312,7 @@
 #endif
 
 #define CONFIG_BOOT_POWER
+#define CONFIG_GAUGE_BQ27441
 #define CONFIG_CHECK_KEY
 
 #endif /* __CONFIG_S500_H */

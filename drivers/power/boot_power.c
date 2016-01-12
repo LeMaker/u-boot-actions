@@ -4,14 +4,21 @@
 
 #include <libfdt.h>
 #include <fdt_support.h>
-
+#include <asm/arch/gmp.h>
 #include <asm/io.h>
 
 #include <asm/arch/pwm.h>
 
-#define LOW_POWER_CAP 7
 #define DEFAULT_CAP 15
 
+struct boot_power_cfg_items {
+	int boot_cap_threshold;
+	int gauge_bus_id;
+	int gauge_id;
+};
+struct boot_power_cfg_items power_cfg_items;
+
+extern int hw_gauge_get_capacity(int gauge_bus_id);
 DECLARE_GLOBAL_DATA_PTR;
 /* PMU_CHARGER_CTL1 */
 static const u16 pmu_charger_ctl1[OWL_PMU_ID_CNT] = {
@@ -203,12 +210,10 @@ int get_charge_plugin_status(int* wall_mv, int* vbus_mv)
 int get_adaptor_type(int *type)
 {
 	char *node_path[OWL_PMU_ID_CNT] = {"/spi@b0204000/atc2603a@00/atc260x-power"," ","/i2c@b0170000/atc2603c@65/atc260x-power"};
-
-	const void *blob = gd->fdt_blob;
-	
+	const void *blob = gd->fdt_blob;	
 	int node;
-	printf("node_path[%d]=%s\n",OWL_PMU_ID,node_path[OWL_PMU_ID]);
 	
+	printf("node_path[%d]=%s\n",OWL_PMU_ID,node_path[OWL_PMU_ID]);	
 	node = fdt_path_offset(blob, node_path[OWL_PMU_ID]);
 	*type = fdtdec_get_int(blob, node, "support_adaptor_type", UNKNOWN);
 	switch(*type)
@@ -219,6 +224,22 @@ int get_adaptor_type(int *type)
 		default:		  printf("cannot find support type!!\n");return 0;
 	}
 }
+
+/* modifed @2015-10-13
+ *in uboot .dts file, add gauge_id¡¢gauge_bus_id¡¢boot_cap_threshold three configuration items
+ */		 
+void get_cfg_items(void)
+{
+	char *node_path[OWL_PMU_ID_CNT] = {"/spi@b0204000/atc2603a@00/atc260x-power"," ","/i2c@b0170000/atc2603c@65/atc260x-power"};
+	const void *blob = gd->fdt_blob;
+	int node;
+	
+	node = fdt_path_offset(blob, node_path[OWL_PMU_ID]);
+	power_cfg_items.gauge_id = fdtdec_get_int(blob, node, "gauge_id", 0);	
+	power_cfg_items.gauge_bus_id  = fdtdec_get_int(blob, node, "gauge_bus_id", 2);	
+	power_cfg_items.boot_cap_threshold  = fdtdec_get_int(blob, node, "boot_cap_threshold", 7);	
+}
+
 bool support_minicharger()
 {
 	char *node_path[OWL_PMU_ID_CNT] = {"/spi@b0204000/atc2603a@00/atc260x-power"," ","/i2c@b0170000/atc2603c@65/atc260x-power"};
@@ -248,6 +269,7 @@ void check_power(void)
 	
 	gd->flags &= 0x3ffff;
 	
+	get_cfg_items();
 	charge_plugin_status = get_charge_plugin_status(&wall_mv, &vbus_mv);
 	
 	if(get_bat_voltage(&bat_mv))
@@ -322,15 +344,17 @@ void check_power(void)
 			
 			/*
 				change by tuhm @2015-03-03 
-				gauge_id: 0 soft gague;1 eg2801 ; 2 bq27441
-				afi.cfg set value 0x68=0x02 used bq27441
-							   0x68=0x00 used soft gauge
-				afi.cfg set value 0x64 is i2c bus id
+				gauge_id: 0 default gague;1 hw_gauge
 			*/
-			get_bat_capacity(&cap,bat_mv);
-			printf("low power cap :%d\n",cap);
+			if(power_cfg_items.gauge_id == 1){
+				cap = hw_gauge_get_capacity(power_cfg_items.gauge_bus_id);
+				printf("[HW_GUAGE] low power capacity :%d \n",cap);
+			}else{
+				get_bat_capacity(&cap,bat_mv);
+				printf("low power cap :%d\n",cap);
+			}
 
-			if(cap < LOW_POWER_CAP)
+			if(cap < power_cfg_items.boot_cap_threshold)
 			{
 				/* someone may request NOT TO enter mini-charger THIS TIME. */
 				/* although this can not be fulfilled, the flag should be clear. */
