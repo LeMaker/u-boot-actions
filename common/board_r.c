@@ -99,25 +99,25 @@ static int initr_secondary_cpu(void)
 
 static int check_boot_flag(void)
 {
-	printf("bootmode = %d\n" ,owl_get_boot_mode());
+	debug("bootmode = %d\n" ,owl_get_boot_mode());
 	if ( owl_get_boot_mode() != BOOT_MODE_PRODUCE ) {		
 		if(owl_get_boot_dev() == OWL_BOOTDEV_NAND) {
 			setenv("bootcmd", "run nandboot");
 			setenv("devif", "nand");
-			printf("nand boot\n");
+			printf("*** nand boot ***\n");
 		} else if(owl_get_boot_dev() == OWL_BOOTDEV_SD2){
 			setenv("bootcmd", "run emmcboot");
 			setenv("devif", "mmc");
-			printf("emmc boot\n");
+			printf("*** emmc boot ***\n");
 		} else {
 			setenv("bootcmd", "run mmcboot");
 			setenv("devif", "mmc");	
-			printf("sd boot\n");
+			printf("*** sd boot ***\n");
 		}
 	} else {
 		setenv("bootcmd", "run ramboot");
 		setenv("bootdelay", "0");
-		printf("produce boot\n");
+		printf("*** produce boot ***\n");
 	}
 	
 	return 0;
@@ -331,7 +331,7 @@ static int initr_dm(void)
 __weak int power_init_board(void)
 {
 	if(owl_get_boot_mode() != BOOT_MODE_PRODUCE){
-		printf("begin to check power!\n");
+		debug("begin to check power!\n");
 		check_power();
 	}
 	return 0;

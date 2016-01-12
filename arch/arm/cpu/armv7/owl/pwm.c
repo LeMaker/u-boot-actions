@@ -165,7 +165,7 @@ static int fdtdec_pwm_parse(const void *blob, int node,
 	}
 
 	pwm_node = fdt_node_offset_by_phandle(blob, data[0]);
-	printf("pwm_node=%x, pwm_chip.pwm_node=%x\n", pwm_node, pwm_chip.pwm_node);
+	debug("pwm_node=%x, pwm_chip.pwm_node=%x\n", pwm_node, pwm_chip.pwm_node);
 	if (pwm_node != pwm_chip.pwm_node) {
 		printf(
 			"%s: PWM property '%s' phandle %d not recognised\n",
@@ -184,9 +184,9 @@ static int fdtdec_pwm_parse(const void *blob, int node,
 	pwm->polarity =
 		((data[3] == 0) ? PWM_POLARITY_NORMAL : PWM_POLARITY_INVERSED);
 
-	printf("pwm id = %d\n", pwm->hwpwm);
-	printf("pwm period = %d\n", pwm->period);
-	printf("pwm polarity = %d\n", pwm->polarity);
+	debug("pwm id = %d\n", pwm->hwpwm);
+	debug("pwm period = %d\n", pwm->period);
+	debug("pwm polarity = %d\n", pwm->polarity);
 
 	return 0;
 }
@@ -198,7 +198,7 @@ int fdtdec_pwm_get(const void *blob, int node,
 	int depth;
 	int offset;
 
-	printf("%s: fdtdec_pwm_get(%p, %d, %s, %d)\n", __func__, blob, node, prop_name, pwm->hwpwm);
+	debug("%s: fdtdec_pwm_get(%p, %d, %s, %d)\n", __func__, blob, node, prop_name, pwm->hwpwm);
 	ret = fdtdec_pwm_parse(blob, node, prop_name, pwm);
 	if (ret) {
 		printf("%s: fdtdec_pwm_get failed\n", __func__);
@@ -224,14 +224,14 @@ int fdtdec_pwm_get(const void *blob, int node,
 		}
 	}
 
-	printf("%s: fdtdec_pwm_get not found\n", __func__);
+	debug("%s: fdtdec_pwm_get not found\n", __func__);
 	/*pwm id not found*/
 	return -1;
 }
 
 int pwm_init(const void *blob)
 {
-	printf("pwm_init, blob %p\n", blob);
+	debug("pwm_init, blob %p\n", blob);
 
 	pwm_chip.pwm_node = fdtdec_next_compatible(blob, 0,
 		COMPAT_ACTIONS_OWL_PWM);
@@ -240,7 +240,7 @@ int pwm_init(const void *blob)
 		return -1;
 	}
 
-	printf("PWM init, node %d\n", pwm_chip.pwm_node);
+	debug("PWM init, node %d\n", pwm_chip.pwm_node);
 
 	return 0;
 

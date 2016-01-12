@@ -88,6 +88,8 @@ typedef volatile unsigned char	vu_char;
 #define CONFIG_SYS_SUPPORT_64BIT_DATA
 #endif
 
+#undef DEBUG   //disable the macro DEBUG
+
 #ifdef DEBUG
 #define _DEBUG	1
 #else

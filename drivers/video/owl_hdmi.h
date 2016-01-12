@@ -9,7 +9,7 @@
 #define __OWL_HDMI_H__
 
 
-#define HDMI_DRV_DEBUG 1
+#define HDMI_DRV_DEBUG 0
 #if (HDMI_DRV_DEBUG == 1)
 #define HDMI_DRV_PRINT(fmt, args...)	\
 	do { printf("hdmi: " fmt, ##args); } while (0)

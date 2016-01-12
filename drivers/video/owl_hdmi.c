@@ -519,7 +519,7 @@ void *hdmi_get_mode(struct hdmi_video_settings *settings)
     index = sizeof(hdmi_display_modes) / sizeof(struct asoc_videomode) - 1;
 
     while (index >= 0) {
-		printf("settings->vid %d hdmi_display_modes[index].mode.vid %d \n",settings->vid,hdmi_display_modes[index].vid);
+		debug("settings->vid %d hdmi_display_modes[index].mode.vid %d \n",settings->vid,hdmi_display_modes[index].vid);
         if (settings->vid == hdmi_display_modes[index].vid)
             return (void *)&hdmi_display_modes[index];
         --index;
@@ -1167,7 +1167,7 @@ s32 hdmi_video_general_cfg(struct hdmi_video_settings *settings)
                        HDMI_SCHCR, readl(HDMI_SCHCR));
         }
 
-        printf("[%s]sink_info.sink_cap.pixel_encoding is 0x%x\n",
+        debug("[%s]sink_info.sink_cap.pixel_encoding is 0x%x\n",
                __func__, sink_info.sink_cap.pixel_encoding);
         /*pixel_coding(RGB default) */
         if ((settings->pixel_encoding == VIDEO_PEXEL_ENCODING_YCbCr444)
@@ -1413,12 +1413,12 @@ int read_usr_cfg_file(const char* file_name, char* buf)
     loff_t actread;
     const char* ifname;
     
-    printf("read_usr_cfg_file\n");
+    debug("read_usr_cfg_file\n");
 
     ifname = getenv("devif");
     if ( ifname == NULL ) {
         ifname = "nand";
-        printf("get devif fail\n");
+        debug("get devif fail\n");
     }
     dev = get_boot_dev_num();
     
@@ -1429,12 +1429,11 @@ int read_usr_cfg_file(const char* file_name, char* buf)
     }
 
     if (get_partition_info(dev_desc, part, &info)) {
-        printf("** get_partition_info %s%d:%d\n",
+        debug("** get_partition_info %s%d:%d\n",
                 ifname, dev, part);
 
         if (part != 0) {
-            printf("** Partition %d not valid on device %d **\n",
-                    part, dev_desc->dev);
+            //printf("** Partition %d not valid on device %d **\n", part, dev_desc->dev);
             return -1;
         }
 
@@ -1476,7 +1475,7 @@ int read_usr_cfg_file(const char* file_name, char* buf)
     }
     ext4fs_close();
     
-    printf("buf=%s", buf);
+    debug("buf=%s", buf);
     
   
     return 0;
@@ -1519,9 +1518,9 @@ int hdmi_init(void)
 	}
 	    if (valide_vid(bootvid)){
 	        psink_info->v_settings.vid = bootvid;
-	        printf("%s: read vid  success = %d\n",__func__, bootvid);
+	        debug("%s: read vid  success = %d\n",__func__, bootvid);
 	    } else {
-	        printf("%s: first time used config vid  = %d\n",__func__, psink_info->v_settings.vid );
+	        debug("%s: first time used config vid  = %d\n",__func__, psink_info->v_settings.vid );
 	    }
 	
 		if(bootvid == 7)
@@ -1561,7 +1560,7 @@ int hdmi_init(void)
 		else
 			sprintf(buf, "%s hdmi_vid=%d",bootargs,settings.vid);
 		
-		printf("hdmi_init bootargs %s \n",buf);
+		debug("hdmi_init bootargs %s \n",buf);
 		
 		setenv("bootargs.add", buf);
 	    	

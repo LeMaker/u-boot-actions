@@ -596,6 +596,11 @@ int check_hdmi_mode(int mode)
 	i = MODE_COUNT;
 	
 	parse_edid(&edid);		
+
+	if(1 == edid.read_ok)
+		printf("parse hdmi edid information successfully\n");
+	else
+		printf("parse hdmi edid information unsuccessfully\n");
 	
 	if(mode > 0){
 		for(i=0;i<MODE_COUNT;i++){
@@ -606,7 +611,7 @@ int check_hdmi_mode(int mode)
 	}
 	for(i=0;i<MODE_COUNT;i++){
 		if(edid.video_formats[0]&(1<<hdmi_mode[i].vid)){
-			printf("find support mode %d \n", hdmi_mode[i].mode);
+			debug("find support mode %d \n", hdmi_mode[i].mode);
 			return hdmi_mode[i].mode;
 		}
 	}

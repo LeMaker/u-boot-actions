@@ -404,6 +404,7 @@ int read_mi_head(misc_info_head_t * head)
 	char *head_buf = NULL;
 
 	PRINT_DBG("%s, line %d\n",__func__, __LINE__);
+
 	head_length = sizeof(misc_info_head_t);
 	head_buf = MALLOC(head_length);
 	if(!head_buf){
@@ -477,7 +478,7 @@ int read_mi_item(char *name, void *buf, unsigned int count)
 		PRINT_ERR("read Head failed\n");
 		goto OUT_FAILED;
 	}else if(ret == 0){
-		PRINT_ERR("read Head null\n");
+		PRINT_DBG("read Head null\n");
 		ret = -1;
 		goto OUT_FAILED;
 	}
