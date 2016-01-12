@@ -95,6 +95,46 @@ static int boot_fdt_setprop(void *blob)
 	return 0;
 }
 
+int boot_append_bootargs_add(void *fdt)
+{
+	int node = 0, ret = 0;
+	const char *bootargs;
+	char *bootargs_add;
+	char new_prop[CONFIG_SYS_BARGSIZE];
+
+	bootargs_add = getenv("bootargs.add");
+	if (bootargs_add == NULL)
+		return 0;
+
+	/* find "/chosen" node. */
+	node = fdt_path_offset(fdt, "/chosen");
+	if (node < 0) {
+		printf("fdt_path_offset failed %d\n", node);
+		return -1;
+	}
+
+	bootargs = fdt_getprop(fdt, node, "bootargs", NULL);
+	if (!bootargs) {
+		printf("%s: Warning: No bootargs in fdt %s\n", __func__,
+		       bootargs);
+		return -1;
+	}
+
+	snprintf(new_prop, CONFIG_SYS_BARGSIZE, "%s %s",
+		 bootargs, bootargs_add);
+
+	ret = fdt_setprop(fdt, node, "bootargs",
+			  new_prop, strlen(new_prop) + 1);
+	if (ret < 0) {
+		printf("could not set bootargs %s\n", new_prop);
+		return ret;
+	}
+
+	printf("%s, bootargs %s\n", __func__, new_prop);
+
+	return 0;
+}
+
 
 void owl_boot_fdt_setup(void *blob)
 {
@@ -207,4 +247,5 @@ void owl_boot_fdt_setup(void *blob)
 
 	printf("cmdline: %s\n", getenv("bootargs"));
     boot_fdt_setprop(blob);
+	boot_append_bootargs_add(blob);
 }
