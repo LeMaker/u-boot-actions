@@ -618,27 +618,27 @@ s32 hdmi_set_tdms_ldo(int vid, int deep_color, int _3d)
     case OWL_TV_MOD_576P:
     case OWL_TV_MOD_480P :  
         if (_3d == _3D) {
-        	hdmi_tx_1_value =  0x81982986; 
+        	hdmi_tx_1_value =  0x81982983; 
         	hdmi_tx_2_value =  0x18f80f89;               
         } else {
-            hdmi_tx_1_value =  0x819c2986; 
+            hdmi_tx_1_value =  0x819c2983; 
         	hdmi_tx_2_value =  0x18f80f89;                   
         }
         break;
     case OWL_TV_MOD_720P_60HZ: 
     case OWL_TV_MOD_720P_50HZ:
         if (_3d == _3D) {            
-            hdmi_tx_1_value =  0x81902986; 
+            hdmi_tx_1_value =  0x81902983; 
         	hdmi_tx_2_value =  0x18f80f89;             
         } else {
             if (deep_color == DEEP_COLOR_24_BIT) {
-                hdmi_tx_1_value =  0x81942986; 
+                hdmi_tx_1_value =  0x81942983; 
         		hdmi_tx_2_value =  0x18f80f89;   
             } else if (deep_color == DEEP_COLOR_30_BIT) {
-                hdmi_tx_1_value =  0x81942986; 
+                hdmi_tx_1_value =  0x81942983; 
         		hdmi_tx_2_value =  0x18f80f89;  
             }else if (deep_color == DEEP_COLOR_36_BIT) {
-                hdmi_tx_1_value =  0x81942986; 
+                hdmi_tx_1_value =  0x81942983; 
         		hdmi_tx_2_value =  0x18f80f89;  
             }
             
@@ -652,7 +652,7 @@ s32 hdmi_set_tdms_ldo(int vid, int deep_color, int _3d)
         	hdmi_tx_2_value =  0x18fa0f39;              
         } else {
             if (deep_color == DEEP_COLOR_24_BIT) {
-                hdmi_tx_1_value =  0x81902986; 
+                hdmi_tx_1_value =  0x81902983; 
         		hdmi_tx_2_value =  0x18f80f89;  
             } else if (deep_color == DEEP_COLOR_30_BIT) {
                 hdmi_tx_1_value =  0xa2b0285a; 
@@ -669,15 +669,15 @@ s32 hdmi_set_tdms_ldo(int vid, int deep_color, int _3d)
             hdmi_tx_1_value =  0xa2b0285a; 
         	hdmi_tx_2_value =  0x18fa0f39;   
         } else if (deep_color == DEEP_COLOR_30_BIT) {
-            hdmi_tx_1_value =  0x81900986; 
+            hdmi_tx_1_value =  0x81900983; 
         	hdmi_tx_2_value =  0x18f80089;   
         } else if (deep_color == DEEP_COLOR_36_BIT) {
-            hdmi_tx_1_value =  0x81900986; 
+            hdmi_tx_1_value =  0x81900983; 
         	hdmi_tx_2_value =  0x18f80089;   
         }
         break;        
     default:
-        hdmi_tx_1_value =  0x81982986; 
+        hdmi_tx_1_value =  0x81982983; 
         hdmi_tx_2_value =  0x18f80089;              
         break;
     }   
@@ -1351,7 +1351,7 @@ static u32 string_to_data_fmt(const char *name)
 
 	return -1;
 }
-static int fdtdec_get_hdmi_par(int *  bootable, int *  bootrotate, int * bootvid , int * channel_invert,int * bit_invert)
+static int fdtdec_get_hdmi_par(int *  bootable, int *  bootrotate, int * bootvid , int * channel_invert,int * bit_invert ,int *i2cb)
 {
     int dev_node;
     const char *resolution ;
@@ -1374,6 +1374,7 @@ static int fdtdec_get_hdmi_par(int *  bootable, int *  bootrotate, int * bootvid
     {
     	*bootrotate = fdtdec_get_int(gd->fdt_blob, dev_node, "bootrotate", 0);
     	
+    	*i2cb = fdtdec_get_int(gd->fdt_blob, dev_node, "i2cbus", 0); 
     	
     	*channel_invert = fdtdec_get_int(gd->fdt_blob, dev_node, "channel_invert", 0);
     	
@@ -1499,23 +1500,18 @@ int hdmi_init(void)
     int i=0; 
     char buf[256]={0};
     char * bootargs ;
-    int bootable,bootrotate,bootvid,channel_invert,bit_invert;
+    int bootable,bootrotate,bootvid,channel_invert,bit_invert,i2cb;
 
     struct hdmi_sink_info* psink_info = &sink_info;
     
-    if (fdtdec_get_hdmi_par(&bootable,&bootrotate,&bootvid,&channel_invert,&bit_invert)) {
+    if (fdtdec_get_hdmi_par(&bootable,&bootrotate,&bootvid,&channel_invert,&bit_invert,&i2cb)) {
        printf("%s: error, fdtdec_get_hdmi_par: fdt No hdmi par, and now do nothing temply\n", __func__);
     }
     
     if(bootable != 0 && hdmi_get_plug_state() == 1 && (bootrotate == 0 || bootrotate == 3)){   
     	     
-		bootvid = check_hdmi_mode(bootvid);
-		if (!bootvid)
-			{
-			if (fdtdec_get_hdmi_par(&bootable,&bootrotate,&bootvid,&channel_invert,&bit_invert)) {
-       printf("%s: error, fdtdec_get_hdmi_par: fdt No hdmi par, and now do nothing temply\n", __func__);
-    	}
-	}
+		bootvid = check_hdmi_mode(bootvid,i2cb);
+		
 	    if (valide_vid(bootvid)){
 	        psink_info->v_settings.vid = bootvid;
 	        debug("%s: read vid  success = %d\n",__func__, bootvid);

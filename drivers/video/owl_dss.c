@@ -604,7 +604,16 @@ int de_hw_init(void)
     /*set noc priority */
     writel(0x0f, 0xb0500108);
     /*DE out standing to 0x1f*/
-    writel(0x1f0000, 0xb02e000c);    
+    writel(0x1f0000, 0xb02e000c);  
+    
+    /*main display always on path 0 ,we need force open path 0 */
+    if((readl(PATHx_CTL(0)) & PATH_CTL_PATH_ENABLE) == 0)
+    {
+    	writel(readl(PATHx_CTL(0)) | PATH_CTL_PATH_ENABLE |PATH_CTL_FCR, PATHx_CTL(0)); 
+    	writel(0x02cf04ff, PATHx_SIZE(0));  
+    }
+    
+
     return 0;
 }
 
@@ -824,11 +833,14 @@ static int allocate_buf(struct fb_addr *buf, u32 size, u32 bytes_align)
     
     rsv_size = get_fb_heap_size();
     
-    if(memory_size > 512 * 1024 * 1024)
-    {
-    	memory_size = 768 * 1024 * 1024 ;
-    }
-    
+    if(memory_size >1024*1024*1024)
+    	{
+    		memory_size = 768 * 1024 * 1024 ;
+    	}
+    else if(memory_size > 512 * 1024 * 1024)
+    	{
+    		memory_size = 760 * 1024 * 1024 ;
+    	} 
     addr = memory_size - rsv_size;
     
     debug(

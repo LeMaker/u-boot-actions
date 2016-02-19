@@ -689,5 +689,5 @@ void image_on(void);
 int cec_init(void);
 int send_message(unsigned char, unsigned char *, unsigned char);
 extern int hdmi_init(void);
-extern int check_hdmi_mode(int mode);
+extern int check_hdmi_mode(int mode,int i2cbus);
 #endif
