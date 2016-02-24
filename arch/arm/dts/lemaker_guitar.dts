@@ -362,6 +362,9 @@
 	framebuffer {
 		compatible = "actions,framebuffer";
 		def_display = "hdmi";
+		xres = <1280>;
+		yres = <720>;
+		bpp = <4>;
 	};
 
 	pwm: pwm@b01b0050 {

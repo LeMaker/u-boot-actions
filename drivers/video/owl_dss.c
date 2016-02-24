@@ -51,6 +51,7 @@ struct owl_display {
 
 static struct owl_display display_list[MAX_NUM_DISP_DEV];
 static u32 registered_display_ids;
+static char *def_display;
 
 static int get_memory_size(void)
 {
@@ -525,8 +526,8 @@ static void de_hw_output_config(struct owl_display * display,int * channel_id,in
         break;
     case LCD_DISPLAYER:
         path_output_sel = 0x3;
-        *channel_id = 0;
-        *layer_id  = 0;
+        *channel_id = 1;
+        *layer_id  = 3;
         break;
     case LCD1_DISPLAYER:
         path_output_sel = 0x4;
@@ -534,16 +535,16 @@ static void de_hw_output_config(struct owl_display * display,int * channel_id,in
         break;
     case DSI_DISPLAYER:
         path_output_sel = 0x1;
-        *channel_id = 0;
-        *layer_id  = 0;
+        *channel_id = 1;
+        *layer_id  = 3;
         break;
     default:
         printf("de: not support yet\n");
         return -1;
     }
 	/* if this is default display */
-	if(dss.display && dss.display->display_id == display->display_id&&display->display_id!=TV_CVBS_DISPLAYER){
-		debug("display->name %s is a default display ,used channel 0 and layer 0 \n",display->name);
+	if(dss.display && dss.display->display_id == display->display_id && !strcmp(def_display,display->name)){
+		printf("display->name %s is a default display ,used channel 0 and layer 0 \n",display->name);
 		*channel_id = 0;
         *layer_id  = 0;
 	}
@@ -964,6 +965,7 @@ int fdtdec_get_fb_par(struct owl_dss * dss)
             gd->fdt_blob, subnode, "def_display", &len);
     if (!def_display_name)
         return -1;
+    printf("def_display_name %s \n", def_display_name);
 	
 	dss->display = get_display_by_name(def_display_name);
 	
@@ -971,7 +973,7 @@ int fdtdec_get_fb_par(struct owl_dss * dss)
 	{
 	    debug("def_display_name  %s not found \n", def_display_name);
 	}
-	
+	def_display = def_display_name;
     bpp = fdtdec_get_int(
             gd->fdt_blob, subnode, "bpp", -1);			
     if (bpp <= 0)
