@@ -1551,17 +1551,14 @@ int hdmi_init(void)
 		
 	    bootargs = getenv("bootargs.add");
 	    	    
-		if (bootargs == NULL)
-			sprintf(buf, "hdmi_vid=%d",settings.vid);
-		else
-			sprintf(buf, "%s hdmi_vid=%d",bootargs,settings.vid);
+
+	    sprintf(buf, "hdmi_vid=%d",settings.vid);
 		
-		debug("hdmi_init bootargs %s \n",buf);
-		
-		setenv("bootargs.add", buf);
+	    debug("hdmi_init bootargs %s \n",buf);
+
+	    setenv("bootargs.add", buf);
 	    	
-		
-		HDMI_DRV_PRINT("[%s owl_display_register v_mode->mode %p settings.vid %d \n", __func__,v_mode->mode,settings.vid);
+	    HDMI_DRV_PRINT("[%s owl_display_register v_mode->mode %p settings.vid %d \n", __func__,v_mode->mode,settings.vid);
 	    owl_display_register(HDMI_DISPLAYER,"hdmi",&hdmi_ops, &(v_mode->mode),24,bootrotate);
 	}
 	
