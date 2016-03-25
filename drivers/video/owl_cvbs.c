@@ -229,6 +229,14 @@ static int fdtdec_get_cvbs_par(int *  bootable, int * bootvid)
         printf("%s: failed get default vid ,we used  default \n",__func__);
         return -1;
     }
+//add by LeMaker
+   ret = fdtdec_get_is_enabled(gd->fdt_blob,dev_node);
+
+   if(!ret){
+		printf("cvbs disabled by dts\n");
+		return -1;
+   }
+//---end   
     *bootable = fdtdec_get_int(gd->fdt_blob, dev_node, "bootable", 0);
   
     if(*bootable != 0)
@@ -245,10 +253,10 @@ static int fdtdec_get_cvbs_par(int *  bootable, int * bootvid)
 	        * bootvid = vid;
 	    } else {    	
 	    	* bootvid = OWL_TV_MOD_PAL; 
-	        printf("%s: not support %s ,we used default vid  = %d\n",__func__, resolution, bootvid);
+	        printf("%s: not support %s ,we used default vid  = %d\n",__func__, resolution, *bootvid);
 	    }
     }
-    return ret;
+    return 0;
 }
 
 
@@ -377,10 +385,8 @@ static int skip_atoi(char *s)
 
 
 
-void cvbs_init()
+int  cvbs_init()
 {
-	
-
 	/*------------GET CONFIG FROM SETTING------------*/
 	char mode[64]={0};
 	char buf[256]={0};
@@ -388,12 +394,9 @@ void cvbs_init()
 	int len = strlen(ntsc_mode);
 	int bootable,bootvid;
 
-	printf("cvbs_init uboot\n");
-	if (fdtdec_get_cvbs_par(&bootable,&bootvid)) {
-       printf("%s: error, fdtdec_get_cvbs_par: fdt No cvbs par, and now do nothing temply\n", __func__);
-    }
-    
-  printf("cvbs boot init\n");  
+	if (fdtdec_get_cvbs_par(&bootable, &bootvid)) {
+		return -1;
+	} 
   
   	/*------------CVBS INIT------------*/
 	
@@ -401,15 +404,15 @@ void cvbs_init()
 	  mdelay(50);
 	
 	    /*configure TVOUT_DDCR*/
-		writel(0x110050, TVOUT_DDCR);
+	  writel(0x110050, TVOUT_DDCR);
 		
-		writel(0x7<<8,TVOUT_PRL);
-		/* disable before registering irq handler */
-		writel(0x0, TVOUT_OCR);
+	  writel(0x7<<8,TVOUT_PRL);
+
+	   /*disable before registering irq handler */
+	  writel(0x0, TVOUT_OCR);
 		
-		/* clear pendings before registering irq handler */
-		//writel(readl(TVOUT_STA), TVOUT_STA);
-		
+	  /* clear pendings before registering irq handler */
+	  //writel(readl(TVOUT_STA), TVOUT_STA);
 		
 	if(bootable != 0&&get_cvbs_state()==1)
 	{
@@ -436,6 +439,8 @@ void cvbs_init()
 	
 		owl_display_register(TV_CVBS_DISPLAYER,"cvbs",&cvbs_ops, &cvbs_display_mode,24,1);
 	}
+
+	return 0;
 }
 
 int cvbs_enable()

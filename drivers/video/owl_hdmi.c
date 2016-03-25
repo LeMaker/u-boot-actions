@@ -1389,7 +1389,7 @@ static int fdtdec_get_hdmi_par(int *  bootable, int *  bootrotate, int * bootvid
 	        * bootvid = vid;
 	    } else {    	
 	    	* bootvid = -1; 
-	        printf("%s: not support %s ,we used default vid  = %d\n",__func__, resolution, bootvid);
+	        printf("%s: not support %s ,we used default vid  = %d\n",__func__, resolution, *bootvid);
 	    }
     }
     return ret;

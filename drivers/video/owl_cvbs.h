@@ -2,7 +2,7 @@
 #define __GL520X_CVBS_H
 
 void print_cvbsreg();
-void cvbs_init();
+int  cvbs_init();
 int cvbs_enable();
 void cvbs_disable();
 extern struct display_ops cvbs_ops;
