@@ -83,7 +83,7 @@ struct eth_device {
 	unsigned char enetaddr[6];
 	phys_addr_t iobase;
 	int state;
-
+	
 	int  (*init) (struct eth_device *, bd_t *);
 	int  (*send) (struct eth_device *, void *packet, int length);
 	int  (*recv) (struct eth_device *);
@@ -94,6 +94,7 @@ struct eth_device {
 	int  (*write_hwaddr) (struct eth_device *);
 	struct eth_device *next;
 	int index;
+	unsigned int  phy_id;
 	void *priv;
 };
 

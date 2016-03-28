@@ -238,7 +238,7 @@
 #define CONFIG_BOOTLOADER_ADDR         0x200200
 #define CONFIG_UBOOT_ADDR              0x300000
 /* function: usb_ether */
-#define CONFIG_USB_ETHER
+/*#define CONFIG_USB_ETHER*/
 #define CONFIG_USB_ETH_RNDIS
 #define CONFIG_CMD_NET
 #define CONFIG_CMD_PING

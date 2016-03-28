@@ -208,3 +208,39 @@ struct buffer_descriptor {
 #define TXBD_CTRL_TBS1(x)  ((x) & 0x7FF)        /* buf1 size */
 #define TXBD_CTRL_TBS1M (0x7FF)
 
+/*
+ * phy RTL8201F
+ */
+#define PHY_RTL8201F_REG_RMSR           0x10
+#define PHY_RTL8201F_REG_INT_LED_FUNC   0x13
+#define PHY_RTL8201F_REG_PAGE_SELECT    0x1F
+#define PHY_RTL8201F_REG_INT_SNR        0x1E
+
+/* PHY_RTL8201F_PAGE_SELECT */
+#define PHY_RTL8201F_REG_PAGE_SELECT_SEVEN    0x7
+#define PHY_RTL8201F_REG_PAGE_SELECT_ZERO     0x0
+
+#define PHY_RTL8201F_LINK_STATUS_CHANGE     (0x1<<11)
+#define PHY_RTL8201F_RMSR_CLK_DIR_INPUT	    (0x1<<12)
+#define PHY_RTL8201F_RMSR_CLK_DIR_OUTPUT	    (0x0<<12)
+#define PHY_RTL8201F_RMSR_RMII_MODE	        (0x1<<3)
+#define PHY_RTL8201F_RMSR_RMII_RX_OFFSET    (0xF<<4)
+#define PHY_RTL8201F_RMSR_RMII_TX_OFFSET    (0xF<<8)
+#define PHY_RTL8201F_PIN_LINK_STATE_CHANGE  (0x1 <<4)
+
+/*
+ * phy SR8201G
+ */
+#define PHY_SR8201G_REG_RMSR           0xC
+#define PHY_SR8201G_REG_INT_LED_FUNC   0xE
+#define PHY_SR8201G_REG_PAGE_SELECT    0xF
+#define PHY_SR8201G_REG_EXPAND         0x18
+
+/* PHY_SR8201G_PAGE_SELECT */
+#define PHY_SR8201G_REG_PAGE_SELECT_SEVEN    0x7
+#define PHY_SR8201G_REG_PAGE_SELECT_ZERO     0x0
+
+#define PHY_SR8201G_INT_PIN_SELECT             (0x1<<10)
+#define PHY_SR8201G_INT_PIN_LINK_STATE_CHANGE  (0x1<<11)
+#define PHY_SR8201G_CLK_DIR_INPUT	           (0x1<<12)
+/******************************************************************************/

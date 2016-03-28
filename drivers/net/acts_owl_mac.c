@@ -39,6 +39,13 @@ typedef struct owl_mac_info {
 	struct eth_device netdev;
 } owl_mac_info_t;
 
+enum eth_phy_id {
+	ETH_PHY_ID_RTL8201  = 0x001cc810,
+	ETH_PHY_ID_SR8201G = 0x001d2410,
+};
+
+#define PHY_ID_MASK 0xfffffff0
+
 //#define OWL_MAC_PHY_POWER 21
 //#define OWL_MAC_PHY_RESET 20
 //#define OWL_MAC_DEBUG
@@ -116,6 +123,7 @@ static void owl_print_rx_bds(struct eth_device *dev)
 	}
 	printf("----- RX BDs -----\n");
 }
+#endif
 
 static uint16_t owl_mdio_read(struct eth_device *dev, uint8_t phyreg)
 {
@@ -152,7 +160,32 @@ static void owl_mdio_write(struct eth_device *dev,uint8_t phyreg, uint16_t phyda
 		op_reg = readl(MAC_CSR10);
 	}while(op_reg & MII_MNG_SB);
 }
-#endif
+
+void owl_print_phy_register(struct eth_device *dev)
+{
+	printf("phy MII_BMCR: 0x%x\n", (uint)owl_mdio_read(dev, MII_BMCR));
+	printf("phy MII_BMSR: 0x%x\n", (uint)owl_mdio_read(dev, MII_BMSR));
+	printf("phy MII_PHYSID1: 0x%x\n", (uint)owl_mdio_read(dev, MII_PHYSID1));
+	printf("phy MII_PHYSID2: 0x%x\n", (uint)owl_mdio_read(dev, MII_PHYSID2));
+	printf("phy MII_ADVERTISE: 0x%x\n", (uint)owl_mdio_read(dev, MII_ADVERTISE));
+	printf("phy MII_LPA: 0x%x\n", (uint)owl_mdio_read(dev, MII_LPA));
+	printf("phy MII_CTRL1000: 0x%x\n", (uint)owl_mdio_read(dev, MII_CTRL1000));
+	printf("phy MII_STAT1000: 0x%x\n", (uint)owl_mdio_read(dev, MII_STAT1000));
+	printf("phy MII_ESTATUS: 0x%x\n", (uint)owl_mdio_read(dev, MII_ESTATUS));
+	printf("phy MII_DCOUNTER: 0x%x\n", (uint)owl_mdio_read(dev, MII_DCOUNTER));
+	printf("phy MII_FCSCOUNTER: 0x%x\n", (uint)owl_mdio_read(dev, MII_FCSCOUNTER));
+	printf("phy MII_NWAYTEST: 0x%x\n", (uint)owl_mdio_read(dev, MII_NWAYTEST));
+	printf("phy MII_RERRCOUNTER: 0x%x\n", (uint)owl_mdio_read(dev, MII_RERRCOUNTER));
+	printf("phy MII_SREVISION: 0x%x\n", (uint)owl_mdio_read(dev, MII_SREVISION));
+	printf("phy MII_EXPANSION: 0x%x\n", (uint)owl_mdio_read(dev, MII_EXPANSION));
+	printf("phy MII_RESV1: 0x%x\n", (uint)owl_mdio_read(dev, MII_RESV1));
+	printf("phy MII_LBRERROR: 0x%x\n", (uint)owl_mdio_read(dev, MII_LBRERROR));
+	printf("phy MII_PHYADDR: 0x%x\n", (uint)owl_mdio_read(dev, MII_PHYADDR));
+	printf("phy MII_RESV2: 0x%x\n", (uint)owl_mdio_read(dev, MII_RESV2));
+	printf("phy MII_TPISTATUS: 0x%x\n", (uint)owl_mdio_read(dev, MII_TPISTATUS));
+	printf("phy MII_NCONFIG: 0x%x\n", (uint)owl_mdio_read(dev, MII_NCONFIG));
+}
+
 
 static void owl_mac_clock_enable(struct eth_device *dev)
 {
@@ -244,9 +277,13 @@ static int owl_mac_hardware_init(struct eth_device *dev)
 	}while(readl(MAC_CSR0) & EC_BMODE_SWR);
 	if(tmp > OWL_MAC_SWRESET_TIMEOUT)
 		printf("warning:MAC reset error 0x%x\n",readl(MAC_CSR0));
-	writel(readl(MAC_CTRL) & (~(EC_MACCTRL_RSIS)), MAC_CTRL);
-	writel(readl(MAC_CTRL) & (~(EC_MACCTRL_RCPS)), MAC_CTRL);
-	writel((readl(MAC_CSR10) & REG_CLEAR)| MII_MNG_OPCODE(MII_OP_CDS), MAC_CSR10);
+	
+	writel((readl(MAC_CTRL) | EC_MACCTRL_RRSB), MAC_CTRL);  /*REF_CLK input*/
+	
+	writel((readl(MAC_CTRL) | EC_MACCTRL_RCPS), MAC_CTRL);
+	writel((readl(MAC_CTRL) | EC_MACCTRL_RCPS), MAC_CTRL);
+	
+	writel(MII_MNG_SB |MII_MNG_CLKDIV(0x5) | MII_MNG_OPCODE(MII_OP_CDS), MAC_CSR10); //set MDC CLK: 781KHZ
 
 	writel(owl_info->rx_bd_paddr, MAC_CSR3);
 	writel(owl_info->tx_bd_paddr, MAC_CSR4);
@@ -312,7 +349,47 @@ static void owl_prepare_rx_bds(struct eth_device *dev)
 }
 
 /*
- * init mac/phy
+* init phy
+*/
+static int owl_phy_init(struct eth_device *dev)
+{
+	int cnt = 0;
+	int reg_val;
+
+
+	owl_mdio_write(dev, MII_BMCR, BMCR_RESET);  /* software reset */
+	
+	do {
+		reg_val = owl_mdio_read(dev, MII_BMCR);
+		if (cnt++ > 1000) {
+			printf("ethernet phy BMCR_RESET timeout!!!\n");
+			break;
+		}
+	} while (reg_val & BMCR_RESET);
+
+	//owl_print_phy_register(dev);  /*For Debug*/
+
+	/*Get the Phy ID*/
+	dev->phy_id = owl_mdio_read(dev, MII_PHYSID1) ;
+	dev->phy_id = ((dev->phy_id)<< 16 ) | owl_mdio_read(dev, MII_PHYSID2);
+
+	//printf( "PHY ID = 0x%08x\n", dev->phy_id); /*For Debug*/
+	
+	if(((dev->phy_id)  &  PHY_ID_MASK) == ETH_PHY_ID_RTL8201){
+			owl_mdio_write(dev, PHY_RTL8201F_REG_PAGE_SELECT, PHY_RTL8201F_REG_PAGE_SELECT_SEVEN);
+			/*As datasheet says tx&rx offset's default value is 0xF but be zero in fact. Reset them*/ 
+			owl_mdio_write(dev, PHY_RTL8201F_REG_RMSR, 
+				PHY_RTL8201F_RMSR_CLK_DIR_OUTPUT | PHY_RTL8201F_RMSR_RMII_MODE|PHY_RTL8201F_RMSR_RMII_RX_OFFSET|PHY_RTL8201F_RMSR_RMII_TX_OFFSET);
+			owl_mdio_write(dev, PHY_RTL8201F_REG_PAGE_SELECT, PHY_RTL8201F_REG_PAGE_SELECT_ZERO); /*REF_CLK output*/
+	}
+	
+	owl_mdio_write(dev, MII_BMCR, (owl_mdio_read(dev, MII_BMCR) | BMCR_ANENABLE | BMCR_ANRESTART));
+
+	return 0;
+}
+
+/*
+ * init mac
  */
 static int owl_mac_init(struct eth_device *dev, bd_t *bd)
 {
@@ -332,9 +409,6 @@ static int owl_mac_init(struct eth_device *dev, bd_t *bd)
 	owl_prepare_rx_bds(dev);
 
 	owl_mac_hardware_init(dev);
-	/* start to tx & rx packets */
-	writel(EC_IEN_ALL, MAC_CSR7);
-	writel(readl(MAC_CSR6)| EC_OPMODE_ST | EC_OPMODE_SR, MAC_CSR6);
 
 	//writel(0xb03100b0,MAC_CTRL);
 
@@ -344,6 +418,13 @@ static int owl_mac_init(struct eth_device *dev, bd_t *bd)
 	//owl_print_tx_bds(dev);
 	//owl_print_rx_bds(dev);
 	/* */
+
+	owl_phy_init(dev);
+
+	/* start to tx & rx packets */
+	writel(EC_IEN_ALL, MAC_CSR7);
+	writel(readl(MAC_CSR6)| EC_OPMODE_ST | EC_OPMODE_SR, MAC_CSR6);
+	
 	return 0;
 }
 
