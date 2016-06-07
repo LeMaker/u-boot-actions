@@ -7,6 +7,8 @@
 #ifndef __CONFIG_S500_H
 #define __CONFIG_S500_H
 
+#define CONFIG_SUPPORT_RAW_INITRD
+
 #define CONFIG_BOOTCOMMAND "run ramboot;"
 
 #define CONFIG_EXTRA_ENV_SETTINGS			\
@@ -25,8 +27,7 @@
 	"fdt_high=0xffffffff\0"				\
 	"initrd_high=0xffffffff\0"			\
 	"scriptaddr=0x04400000\0" \
-	"bootenv=uEnv.txt\0" \
-	"bootscr=boot.scr\0" \
+	"bootenv=uboot.env\0" \
 	"console=ttyS2,115200\0" \
 	"loglevel=7\0" \
 	"loadkernel=fatload ${devtype} ${devpart} ${kernel_addr_r} uImage\0"	\
