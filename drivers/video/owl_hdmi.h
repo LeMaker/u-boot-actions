@@ -440,7 +440,11 @@ enum __owl_tv_mode_t {
     OWL_TV_MOD_PAL                 = 8,
     OWL_TV_MOD_NTSC                = 9,
     OWL_TV_MOD_4K_30HZ             = 10,
-    OWL_TV_MODE_NUM               =  10,
+    OWL_TV_MOD_600P_60HZ					 = 11,
+    OWL_TV_MOD_768P_60HZ					 = 12,
+    OWL_TV_MOD_1024P_60HZ					 = 13,
+    OWL_TV_MOD_900P_60HZ					 = 14,
+    OWL_TV_MODE_NUM                = 14,
 };
 
 struct video_parameters_t video_parameters[] = {
@@ -479,6 +483,25 @@ struct video_parameters_t video_parameters[] = {
 	 {OWL_TV_MOD_DVI, 0x0, 0x10, 0x10, 0x0, 0x06712ed0, 0x00000000,
 	 0x042ed027, 0x002e8018, 0x00000000, 0x06030103, 0x00001107, 0x00000000,
 	 0x00000000},
+	 //800x600P
+	 {OWL_TV_MOD_600P_60HZ, 0x0, 0x10, 0x10, 0x0, 0x04172730, 0x00000000,
+	 0x0327307f, 0x0027201a, 0x00000000, 0x03ef00cf, 0x00001107, 0x00000000,
+	 0x00000000},	
+	 
+	 //1024x768p 60HZ
+	{OWL_TV_MOD_768P_60HZ, 0x0, 0x10, 0x10, 0x0, 0x053f3250, 0x00000000,
+	 0x05325087, 0x00322022, 0x00000000, 0x05270127, 0x00001107, 0x00000000,
+	 0x00000006},	 
+	 
+	 //1280x1024p 60HZ
+	{OWL_TV_MOD_1024P_60HZ, 0x0, 0x10, 0x10, 0x0, 0x06974290, 0x00000000,
+	 0x0242906f, 0x00428028, 0x00000000, 0x06670167, 0x00001107, 0x00000000,
+	 0x00000000},	
+	 
+	 //1440x900p 60HZ
+	{OWL_TV_MOD_900P_60HZ, 0x0, 0x10, 0x10, 0x0, 0x076f3a30, 0x00000000,
+	 0x023a3097, 0x003a201e, 0x00000000, 0x071f017f, 0x00001107, 0x00000000,
+	 0x00000002},	 
 };
 
 static const struct asoc_videomode hdmi_display_modes[] = {
@@ -643,6 +666,90 @@ static const struct asoc_videomode hdmi_display_modes[] = {
 			.flag = FB_MODE_IS_STANDARD,
 		}
 	},
+	[8] = {
+		.valid = 1,
+		.vid = OWL_TV_MOD_600P_60HZ,
+		.mode = {
+			.name = "VID800x600p_60_16VS9",
+			.refresh = 60,
+			.xres = 800,
+			.yres = 600,
+			.pixclock = 25000,	/*pico second, 1.e-12s */
+			.left_margin = 80,
+			.right_margin = 40,
+			.upper_margin = 23,
+			.lower_margin = 1,
+			.hsync_len = 128,
+			.vsync_len = 4,
+			.sync = 0,
+			.vmode = FB_VMODE_NONINTERLACED,
+			.flag = FB_MODE_IS_STANDARD,
+		}
+	},
+	
+	[9] = {
+		.valid = 1,
+		.vid = OWL_TV_MOD_768P_60HZ,
+		.mode = {
+			.name = "VID1024x768p_60_16VS9",
+			.refresh = 60,
+			.xres = 1024,
+			.yres = 768,
+			.pixclock = 16666,	/*pico second, 1.e-12s */
+			.left_margin = 160,
+			.right_margin = 24,
+			.upper_margin = 29,
+			.lower_margin = 3,
+			.hsync_len = 136,
+			.vsync_len = 6,
+			.sync = 0,
+			.vmode = FB_VMODE_NONINTERLACED,
+			.flag = FB_MODE_IS_STANDARD,
+		}
+	},
+	
+	[10] = {
+		.valid = 1,
+		.vid = OWL_TV_MOD_1024P_60HZ,
+		.mode = {
+			.name = "VID1280x1024p_60_16VS9",
+			.refresh = 60,
+			.xres = 1280,
+			.yres = 1024,
+			.pixclock = 9259,	/*pico second, 1.e-12s */
+			.left_margin = 248,
+			.right_margin = 48,
+			.upper_margin = 39,
+			.lower_margin = 1,
+			.hsync_len = 112,
+			.vsync_len = 3,
+			.sync = 0,
+			.vmode = FB_VMODE_NONINTERLACED,
+			.flag = FB_MODE_IS_STANDARD,
+		}
+	},
+	
+	[11] = {
+		.valid = 1,
+		.vid = OWL_TV_MOD_900P_60HZ,
+		.mode = {
+			.name = "VID1440x900p_60_16VS9",
+			.refresh = 60,
+			.xres = 1440,
+			.yres = 900,
+			.pixclock = 9433,	/*pico second, 1.e-12s */
+			.left_margin = 232,
+			.right_margin = 80,
+			.upper_margin = 28,
+			.lower_margin = 1,
+			.hsync_len = 152,
+			.vsync_len = 3,
+			.sync = 0,
+			.vmode = FB_VMODE_NONINTERLACED,
+			.flag = FB_MODE_IS_STANDARD,
+		}
+	},
+	
 };
 
 struct audio_parameters_t audio_parameters[] = {

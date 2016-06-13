@@ -596,7 +596,24 @@ s32 hdmi_set_clk(int vid, int deep_color, int _3d)
         } else if (deep_color == DEEP_COLOR_36_BIT) {
             writel(0x00260008, CMU_TVOUTPLL);
         }
-        break;        
+        break;
+        
+    case OWL_TV_MOD_1024P_60HZ:
+    			 writel((readl(CMU_TVOUTPLLDEBUG0)|0x1<<31), CMU_TVOUTPLLDEBUG0); 
+     	     writel(0x00050008, CMU_TVOUTPLL);   
+     	    break;
+    case OWL_TV_MOD_600P_60HZ:
+    			 writel((readl(CMU_TVOUTPLLDEBUG0)|0x1<<31), CMU_TVOUTPLLDEBUG0); 
+     	     writel(0xb0440180, CMU_TVOUTPLLDEBUG1);   
+     	    break;
+    case OWL_TV_MOD_768P_60HZ:
+    			 writel((readl(CMU_TVOUTPLLDEBUG0)|0x1<<31), CMU_TVOUTPLLDEBUG0); 
+     	     writel(0xc0330130, CMU_TVOUTPLLDEBUG1);   
+     	    break;
+   	case OWL_TV_MOD_900P_60HZ:
+    			 writel((readl(CMU_TVOUTPLLDEBUG0)|0x1<<31), CMU_TVOUTPLLDEBUG0); 
+     	     writel(0xd03300f0, CMU_TVOUTPLLDEBUG1);   
+     	    break;
     default:           
         writel(0x00040008, CMU_TVOUTPLL);            
         break;
@@ -627,6 +644,8 @@ s32 hdmi_set_tdms_ldo(int vid, int deep_color, int _3d)
         break;
     case OWL_TV_MOD_720P_60HZ: 
     case OWL_TV_MOD_720P_50HZ:
+    case OWL_TV_MOD_600P_60HZ:
+    case OWL_TV_MOD_768P_60HZ:
         if (_3d == _3D) {            
             hdmi_tx_1_value =  0x81902983; 
         	hdmi_tx_2_value =  0x18f80f89;             
@@ -647,6 +666,8 @@ s32 hdmi_set_tdms_ldo(int vid, int deep_color, int _3d)
 
     case OWL_TV_MOD_1080P_60HZ://need check
     case OWL_TV_MOD_1080P_50HZ:
+    case OWL_TV_MOD_1024P_60HZ:
+    case OWL_TV_MOD_900P_60HZ:
         if (_3d == _3D) { 
             hdmi_tx_1_value =  0xa2b0285a; 
         	hdmi_tx_2_value =  0x18fa0f39;              
@@ -1321,6 +1342,10 @@ static int valide_vid(int vid)
         case OWL_TV_MOD_1080P_60HZ:
         case OWL_TV_MOD_4K_30HZ:
         case OWL_TV_MOD_DVI:
+        case OWL_TV_MOD_600P_60HZ:
+        case OWL_TV_MOD_768P_60HZ:
+        case OWL_TV_MOD_1024P_60HZ:
+        case OWL_TV_MOD_900P_60HZ:
             return 1;
         default:
             return 0;
@@ -1339,6 +1364,11 @@ static struct data_fmt_param date_fmts[] = {
 	{"PAL", OWL_TV_MOD_PAL},
 	{"NTSC", OWL_TV_MOD_NTSC},
 	{"4K30HZ", OWL_TV_MOD_4K_30HZ},
+	{"800x600p-60", OWL_TV_MOD_600P_60HZ},
+	{"1024x768p-60", OWL_TV_MOD_768P_60HZ},
+	{"1280x1024p-60", OWL_TV_MOD_1024P_60HZ},
+	{"1440x900p-60", OWL_TV_MOD_900P_60HZ},
+
 };
 
 static u32 string_to_data_fmt(const char *name)
@@ -1551,8 +1581,10 @@ int hdmi_init(void)
 		
 	    bootargs = getenv("bootargs.add");
 	    	    
-
-	    sprintf(buf, "hdmi_vid=%d",settings.vid);
+		if (bootargs == NULL)
+			sprintf(buf, "hdmi_vid=%d",settings.vid);
+		else
+			sprintf(buf, "%s hdmi_vid=%d",bootargs,settings.vid);
 		
 	    debug("hdmi_init bootargs %s \n",buf);
 

@@ -61,6 +61,10 @@ enum VIDEO_ID_TABLE {
 	VID1920x1080P_50_16VS9 = 31,
 	VID1920x1080P_24_16VS9,
 	VID1280x720P_60_DVI = 126,
+	VID800x600P_60_16VS9 = 127,
+	VID1024x768P_60_16VS9 = 128,
+	VID1280x1024P_60_16VS9 = 129,
+	VID1440x900P_60_16VS9 = 130,
 	VID_MAX
 }; 
 
@@ -80,7 +84,11 @@ enum tv_mode {
     OWL_TV_MOD_PAL                 = 8,
     OWL_TV_MOD_NTSC                = 9,
     OWL_TV_MOD_4K_30HZ             = 10,
-    OWL_TV_MODE_NUM               =  10,
+    OWL_TV_MOD_600P_60HZ					 = 11,
+    OWL_TV_MOD_768P_60HZ					 = 12,
+    OWL_TV_MOD_1024P_60HZ					 = 13,
+    OWL_TV_MOD_900P_60HZ					 = 14,
+    OWL_TV_MODE_NUM               =  14,
 };
 
 typedef struct
@@ -99,6 +107,10 @@ static const modes hdmi_mode[] =
 	{OWL_TV_MOD_576P, VID720x576P_50_4VS3},
 	{OWL_TV_MOD_480P, VID720x480P_60_4VS3},
 	{OWL_TV_MOD_DVI,  VID1280x720P_60_DVI},
+	{OWL_TV_MOD_600P_60HZ, VID800x600P_60_16VS9},
+	{OWL_TV_MOD_768P_60HZ, VID1024x768P_60_16VS9},
+	{OWL_TV_MOD_1024P_60HZ, VID1280x1024P_60_16VS9},
+	{OWL_TV_MOD_900P_60HZ, VID1440x900P_60_16VS9},
 };
 
 #define MODE_COUNT (sizeof(hdmi_mode)/sizeof(hdmi_mode[0]))
@@ -611,6 +623,7 @@ int check_hdmi_mode(int mode,int i2cbus)
 				return mode;
 			}
 		}
+		return mode;
 	}
 	for(i=0;i<MODE_COUNT;i++){
 		if(edid.video_formats[0]&(1<<hdmi_mode[i].vid)){
