@@ -163,7 +163,7 @@
 
 /* Do not preserve environment */
 #if defined(CONFIG_ENV_IS_IN_MMC) && defined(CONFIG_MMC)
-#define CONFIG_SYS_MMC_ENV_DEV		1	/* SLOT2: eMMC(1) */
+#define CONFIG_SYS_MMC_ENV_DEV		0	/* SLOT1: SD(0) */
 #define CONFIG_ENV_SIZE			(128 << 10)
 #define CONFIG_ENV_OFFSET		0x5000
 #define CONFIG_ENV_OFFSET_REDUND	(CONFIG_ENV_OFFSET + CONFIG_ENV_SIZE)
